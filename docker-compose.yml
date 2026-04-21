@@ -1,0 +1,34 @@
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+
+  mcp-toolbox:
+    build: ./mcp-toolbox
+    container_name: mcp-toolbox
+    ports:
+      - "8000:8000"
+    depends_on:
+      - ollama
+
+  openwebui:
+    image: ghcr.io/open-webui/open-webui:latest
+    container_name: openwebui
+    ports:
+      - "3000:8080"
+    environment:
+      OLLAMA_BASE_URL: http://ollama:11434
+      WEBUI_SECRET_KEY: change-this-to-a-long-random-string
+    volumes:
+      - openwebui-data:/app/backend/data
+    depends_on:
+      - ollama
+      - mcp-toolbox
+
+volumes:
+  ollama-data:
+  openwebui-data:
